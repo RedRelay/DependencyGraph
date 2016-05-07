@@ -47,14 +47,24 @@ public abstract class DependencyGraph<KEY, DATA extends IData<KEY>>{
 			nextIndex = availables.size()-1;
 		}
 		final Node node = availables.remove(nextIndex);
-		index.remove(node.data.getKey());
+		
+		// Remove from index
+		for(final KEY key : node.data.getKeys()) {
+			index.remove(key);
+		}
+		
+		
 		
 		for(final Node next : node.requiredBySet) {
 			if(next.type instanceof SingleDependency) {
 				availables.add(next);
 			}else if(next.type instanceof MultipleDependency) {
 				final MultipleDependency<KEY> nextNodeType = (MultipleDependency<KEY>) next.type;
-				nextNodeType.getDependencies().remove(node.data.getKey());
+				
+				for(final KEY key : node.data.getKeys()) {
+					nextNodeType.getDependencies().remove(key);
+				}
+				
 				if(nextNodeType.getDependency().isAvailable(Collections.unmodifiableSet(nextNodeType.getDependencies()))) {
 					//Delete this node now available from other dependencies
 					for(final KEY dependency : nextNodeType.getDependencies()) {
@@ -114,8 +124,10 @@ public abstract class DependencyGraph<KEY, DATA extends IData<KEY>>{
 	protected Map<KEY, Node> buildIndex(final Collection<? extends DATA> data) {
 		final Map<KEY, Node> index = new HashMap<KEY, Node>(data.size());
 		for(final DATA d : data) {
-			if(index.put(d.getKey(), new Node(d)) != null) {
-				//TODO exception
+			for(final KEY key : d.getKeys()) {
+				if(index.put(key, new Node(d)) != null) {
+					//TODO exception
+				}
 			}
 		}
 		return index;

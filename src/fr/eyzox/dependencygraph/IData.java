@@ -1,5 +1,5 @@
 package fr.eyzox.dependencygraph;
 
-public interface IData<E> {
-	public E getKey();
+public interface IData<KEY> {
+	public KEY[] getKeys();
 }
